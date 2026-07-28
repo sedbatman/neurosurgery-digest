@@ -1,0 +1,6 @@
+_build/
+.wrangler/
+scripts/deploy.sh
+*.pyc
+__pycache__/
+.DS_Store
