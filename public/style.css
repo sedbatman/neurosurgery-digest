@@ -423,6 +423,17 @@ img { max-width: 100%; }
   padding-bottom: 0.4rem;
   border-bottom: 2px solid var(--accent-dim);
 }
+.article-en-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  direction: ltr;
+  text-align: right;
+  margin: -0.5rem 0 0.75rem;
+  padding: 0.2rem 0;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
 .article-body h3 {
   font-size: 1.1rem;
   font-weight: 600;
