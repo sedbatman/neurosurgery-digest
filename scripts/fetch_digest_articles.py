@@ -15,11 +15,25 @@ PUBMED_SUMMARY = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
 PUBMED_FETCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 QUERIES = [
-    ("spine", "spine+surgery+OR+spinal+fusion+OR+disc+herniation+OR+spinal+stenosis+OR+spinal+deformity"),
-    ("neuro-onc", "glioma+OR+glioblastoma+OR+neuro-oncology+OR+brain+tumor+OR+meningioma"),
-    ("neuro-vasc", "intracranial+aneurysm+OR+subarachnoid+hemorrhage+OR+stroke+OR+cerebrovascular"),
-    ("neuro-trauma", "traumatic+brain+injury+OR+spinal+cord+injury+OR+head+trauma"),
-    ("minimally-invasive", "minimally+invasive+spine+OR+endoscopic+spine+OR+MISS+OR+microsurgery"),
+    # Cranial - Tumor
+    ("neuro-onc", "glioma+OR+glioblastoma+OR+meningioma+OR+pituitary+OR+brain+tumor+OR+neuro-oncology"),
+    ("skull-base", "skull+base+surgery+OR+craniotomy+OR+craniectomy+OR+transsphenoidal"),
+    # Cranial - Vascular
+    ("neuro-vasc-cranial", "intracranial+aneurysm+OR+subarachnoid+hemorrhage+OR+cerebrovascular+OR+AVM+OR+stroke+OR+thrombectomy"),
+    # Cranial - Trauma & Critical Care
+    ("neuro-trauma", "traumatic+brain+injury+OR+intracerebral+hemorrhage+OR+decompressive+craniectomy+OR+neurocritical+care+OR+hydrocephalus"),
+    # Cranial - Functional
+    ("functional", "deep+brain+stimulation+OR+epilepsy+surgery+OR+vagus+nerve+stimulation+OR+neuromodulation"),
+    # Cranial - Peripheral Nerve
+    ("peripheral-nerve", "peripheral+nerve+surgery+OR+nerve+repair+OR+nerve+graft+OR+nerve+transfer+OR+brachial+plexus"),
+    # Spine Surgery (one query, not dominant)
+    ("spine-surgery", "spine+surgery+OR+spinal+fusion+OR+disc+herniation+OR+spinal+stenosis+OR+spinal+deformity+OR+spondylolisthesis"),
+    # Spinal Cord & Trauma
+    ("spinal-cord", "spinal+cord+injury+OR+myelopathy+OR+syringomyelia+OR+intramedullary+tumor"),
+    # Pediatric Neurosurgery
+    ("pediatric-nsgy", "pediatric+neurosurgery+OR+myelomeningocele+OR+craniosynostosis+OR+spina+bifida+OR+chiari"),
+    # Pain & Spine Interventions
+    ("pain-spine", "neuropathic+pain+OR+spinal+stimulation+OR+radiculopathy+OR+failed+back+surgery+OR+kyphoplasty"),
 ]
 
 def fetch_json(url):
