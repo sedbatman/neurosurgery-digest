@@ -83,10 +83,14 @@
             tmp.innerHTML = html;
             const headings = tmp.querySelectorAll('h2');
             let tocItems = '';
+            const articleSlugs = [];
             headings.forEach((h, i) => {
-                const id = 's-' + i;
-                h.id = id;
-                tocItems += `<li><a href="#${id}">${h.textContent}</a></li>`;
+                const origId = h.id; // preserve original id for article links
+                const tocId = 's-' + i;
+                h.id = tocId;
+                tocItems += `<li><a href="#${tocId}">${h.textContent}</a></li>`;
+                // Use original id for article pages, generate one if none exists
+                articleSlugs.push({ id: origId || ('a-' + i), title: h.textContent });
             });
 
             const metaHTML = meta ? `
@@ -97,14 +101,6 @@
                     <span>⏱ ${meta.reading_time || 5} دقیقه مطالعه</span>
                 </div>
             ` : '';
-
-            // Build sidebar with per-article links
-            const articleSlugs = [];
-            tmp.querySelectorAll('h2').forEach((h, i) => {
-                const slug = h.id || ('a-' + i);
-                h.id = slug;
-                articleSlugs.push({ id: slug, title: h.textContent });
-            });
 
             let sidebarLinks = '';
             articleSlugs.forEach(a => {

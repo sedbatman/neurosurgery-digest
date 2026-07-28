@@ -77,8 +77,8 @@
             const tmp = document.createElement('div');
             tmp.innerHTML = html;
 
-            // Find the article with matching id
-            const articleSection = document.getElementById(articleId);
+            // Find the article with matching id within the parsed content
+            const articleSection = tmp.querySelector(`[id="${articleId}"]`);
             if (!articleSection) { showError('بخش مورد نظر در این دایجست یافت نشد'); return; }
 
             const articleHTML = articleSection.outerHTML;
