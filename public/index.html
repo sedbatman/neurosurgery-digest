@@ -55,7 +55,20 @@
 
         <!-- Posts Grid -->
         <section id="postsGrid" class="posts-grid">
-            <!-- Posts will be loaded here dynamically -->
+                        <article class="post-card" data-slug="2026-07-28">
+                <div class="card-header">
+                    <span class="post-date">28 مهر 2647</span>
+                    <span class="study-badge badge-review">مطالعه مروری</span>
+                </div>
+                <h2 class="post-title">
+                    <a href="post.html?slug=2026-07-28">دایجست نوروسرجری امروز — خلاصه ۱۰ مقاله برتر ۲۰۲۵–۲۰۲۶</a>
+                </h2>
+                <p class="post-summary">مروری جامع بر ۱۰ مهم‌ترین مقالات ۲۰۲۵ و ۲۰۲۶ در حوزه نوروسرجری و جراحی ستون فقرات. شامل متاآنالیزهای مقایسه آرتروپلاستی و فیوژن گردن و کمر، تحلیل هزینه-اثربخشی آندوسکوپی، پیامدهای بلندمدت سندرم دم اسب، و موارد دیگر.</p>
+                <div class="card-footer">
+                    <span class="journal-name">📚 Neurosurgical Focus, Spine Journal, JAMA, JNS, Global Spine Journal, European Spine Journal</span>
+                    <span class="reading-time">⏱️ 11 دقیقه</span>
+                </div>
+            </article>
         </section>
 
         <!-- No Results Message -->
@@ -73,20 +86,19 @@
     </footer>
 
     <script>
-        // Posts data
-        let posts = [];
-        
-        // Load posts from JSON
-        async function loadPosts() {
-            try {
-                const response = await fetch('posts.json');
-                posts = await response.json();
-                renderPosts(posts);
-            } catch (error) {
-                console.error('Error loading posts:', error);
-            }
+        // Posts data (embedded from posts.json)
+        const posts = [
+        {
+                "slug": "2026-07-28",
+                "title": "دایجست نوروسرجری امروز — خلاصه ۱۰ مقاله برتر ۲۰۲۵–۲۰۲۶",
+                "summary": "مروری جامع بر ۱۰ مهم‌ترین مقالات ۲۰۲۵ و ۲۰۲۶ در حوزه نوروسرجری و جراحی ستون فقرات. شامل متاآنالیزهای مقایسه آرتروپلاستی و فیوژن گردن و کمر، تحلیل هزینه-اثربخشی آندوسکوپی، پیامدهای بلندمدت سندرم دم اسب، و موارد دیگر.",
+                "date": "2026-07-28",
+                "journal": "Neurosurgical Focus, Spine Journal, JAMA, JNS, Global Spine Journal, European Spine Journal",
+                "study_type": "مطالعه مروری",
+                "reading_time": 11
         }
-
+];
+        
         // Calculate reading time
         function calculateReadingTime(text) {
             const wordsPerMinute = 150;
@@ -115,6 +127,21 @@
             const persianMonth = months[date.getMonth()];
             const persianDay = date.getDate();
             return `${persianDay} ${persianMonth} ${persianYear}`;
+        }
+
+        // Search functionality
+        function filterPosts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const studyType = document.getElementById('studyTypeFilter').value;
+            
+            const filtered = posts.filter(post => {
+                const matchesSearch = post.title.toLowerCase().includes(searchTerm) || 
+                                     post.summary.toLowerCase().includes(searchTerm);
+                const matchesType = !studyType || post.study_type === studyType;
+                return matchesSearch && matchesType;
+            });
+            
+            renderPosts(filtered);
         }
 
         // Render posts
@@ -156,28 +183,13 @@
             });
         }
 
-        // Search functionality
-        function filterPosts() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const studyType = document.getElementById('studyTypeFilter').value;
-            
-            const filtered = posts.filter(post => {
-                const matchesSearch = post.title.toLowerCase().includes(searchTerm) || 
-                                     post.summary.toLowerCase().includes(searchTerm);
-                const matchesType = !studyType || post.study_type === studyType;
-                return matchesSearch && matchesType;
-            });
-            
-            renderPosts(filtered);
-        }
-
         // Event listeners
         document.getElementById('searchInput').addEventListener('input', filterPosts);
         document.getElementById('studyTypeFilter').addEventListener('change', filterPosts);
         document.getElementById('searchBtn').addEventListener('click', filterPosts);
 
-        // Initialize
-        loadPosts();
+        // Initialize - render posts from embedded data
+        renderPosts(posts);
     </script>
 </body>
 </html>
