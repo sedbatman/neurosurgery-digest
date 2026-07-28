@@ -43,23 +43,8 @@ VALID_STUDY_TYPES = [
     "مطالعه موردی"
 ]
 
-# Article HTML template
-ARTICLE_TEMPLATE = """<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title} | neurosurgery.digest</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style.css">
-</head>
-<body>
-    {content}
-</body>
-</html>
-"""
+# Article HTML template — just the content fragment, no wrapper
+# The wrapper (digest.html / article.html) is a static SPA-like page
 
 
 def calculate_reading_time(content: str) -> int:
@@ -85,21 +70,18 @@ def save_posts(posts: list) -> None:
         json.dump(posts, f, ensure_ascii=False, indent=2)
 
 
-def create_post_html(content_file: Path, output_path: Path, title: str) -> None:
-    """Create the article HTML file."""
+def create_post_html(content_file: Path, output_path: Path) -> None:
+    """Create the article HTML content fragment (no wrapper)."""
     # Read the content file
     with open(content_file, "r", encoding="utf-8") as f:
         content = f.read()
     
-    # Generate the full HTML
-    html = ARTICLE_TEMPLATE.format(title=title, content=content)
-    
     # Ensure output directory exists
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
-    # Write the HTML file
+    # Write the HTML content fragment directly (no html/head/body wrapper)
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write(html)
+        f.write(content)
     
     print(f"✅ Created: {output_path.relative_to(PROJECT_DIR)}")
 
@@ -161,21 +143,14 @@ def add_or_update_post(args: argparse.Namespace) -> None:
         posts.append(post_data)
         print(f"➕ Added new post: {args.slug}")
     
-    # Create/update the HTML file
+    # Create/update the HTML file (content fragment, no wrapper)
     output_path = POSTS_DIR / f"{args.slug}.html"
-    create_post_html(content_file, output_path, args.title)
+    create_post_html(content_file, output_path)
     
     # Update posts.json
     update_posts_json(posts)
     
-    # Run build_index to regenerate index.html
-    print("\n🔄 Regenerating index.html...")
-    import subprocess
-    build_index_script = SCRIPT_DIR / "build_index.py"
-    if build_index_script.exists():
-        subprocess.run([sys.executable, str(build_index_script)], check=True)
-    else:
-        print("⚠️  build_index.py not found, skipping index regeneration")
+    # No build_index needed — index.html is a static SPA fetching from posts.json
 
 
 def main():

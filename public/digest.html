@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دايجست | neurosurgery.digest</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="logo">
+                <span class="logo-icon">🧠</span>
+                <div>
+                    <a href="index.html" class="site-name" style="text-decoration:none;">neurosurgery.digest</a>
+                    <div class="site-subtitle">مروری بر مهم‌ترین مقالات نوروسرجری</div>
+                </div>
+            </div>
+            <div class="header-decoration">🦴</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>در حال بارگذاری دایجست...</p>
+        </div>
+        <div id="content"></div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p class="copyright">© ۱۴۰۵ neurosurgery.digest</p>
+            <p class="credit">دکتر علیرضا | آینده جراح مغز و اعصاب</p>
+        </div>
+    </footer>
+
+    <script>
+    const months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+    function fmtDate(d) {
+        const dt = new Date(d);
+        return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()+621}`;
+    }
+
+    function getSlug() {
+        return new URLSearchParams(window.location.search).get('slug');
+    }
+
+    function showError(msg) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').innerHTML = `
+            <div class="error-box">
+                <p>${msg}</p>
+                <a href="index.html" class="back-link">← بازگشت به صفحه اصلی</a>
+            </div>
+        `;
+    }
+
+    async function loadDigest() {
+        const slug = getSlug();
+        if (!slug) { showError('آدرس نامعتبر'); return; }
+
+        try {
+            const [postsR, contentR] = await Promise.all([
+                fetch('posts.json'),
+                fetch(`posts/${slug}.html`)
+            ]);
+
+            if (!contentR.ok) { showError('دايgest مورد نظر یافت نشد.'); return; }
+
+            const posts = await postsR.json();
+            const meta = posts.find(p => p.slug === slug);
+            const html = await contentR.text();
+
+            document.getElementById('loading').style.display = 'none';
+
+            // Build TOC from h2s in the content
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            const headings = tmp.querySelectorAll('h2');
+            let tocItems = '';
+            headings.forEach((h, i) => {
+                const id = 's-' + i;
+                h.id = id;
+                tocItems += `<li><a href="#${id}">${h.textContent}</a></li>`;
+            });
+
+            const metaHTML = meta ? `
+                <div class="article-meta">
+                    <span class="badge">${meta.study_type}</span>
+                    <span>📅 ${fmtDate(meta.date)}</span>
+                    <span>📚 ${meta.journal}</span>
+                    <span>⏱ ${meta.reading_time || 5} دقیقه مطالعه</span>
+                </div>
+            ` : '';
+
+            // Build sidebar with per-article links
+            const articleSlugs = [];
+            tmp.querySelectorAll('h2').forEach((h, i) => {
+                const slug = h.id || ('a-' + i);
+                h.id = slug;
+                articleSlugs.push({ id: slug, title: h.textContent });
+            });
+
+            let sidebarLinks = '';
+            articleSlugs.forEach(a => {
+                sidebarLinks += `<li><a href="article.html?digest=${slug}&article=${a.id}">📄 ${a.title}</a></li>`;
+            });
+
+            document.getElementById('content').innerHTML = `
+                <a href="index.html" class="back-link">← بازگشت به لیست دایجست‌ها</a>
+
+                <div class="page-layout">
+                    <!-- Main Content -->
+                    <div class="page-content">
+                        <div class="digest-intro">
+                            ${meta ? `<strong>${meta.title}</strong> — ${meta.summary}` : ''}
+                        </div>
+                        ${metaHTML}
+                        <div class="article-body">
+                            ${tmp.innerHTML}
+                        </div>
+                    </div>
+
+                    <!-- Sidebar: TOC + Per-Article Links -->
+                    <aside class="page-sidebar">
+                        <div class="toc-card" style="margin-bottom:1rem;">
+                            <div class="toc-title">📑 فهرست مطالب</div>
+                            <ul class="toc-list" id="tocList">${tocItems}</ul>
+                        </div>
+                        <div class="toc-card">
+                            <div class="toc-title">📄 مقالات جداگانه</div>
+                            <ul class="toc-list" id="articleLinks">${sidebarLinks}</ul>
+                        </div>
+                    </aside>
+                </div>
+            `;
+
+            // Scroll spy for TOC
+            const tocLinks = document.querySelectorAll('#tocList a');
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        tocLinks.forEach(l => {
+                            l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+                        });
+                    }
+                });
+            }, { rootMargin: '-80px 0px -60% 0px' });
+            document.querySelectorAll('#content h2').forEach(h => observer.observe(h));
+
+            // Smooth scroll for TOC clicks
+            tocLinks.forEach(a => {
+                a.addEventListener('click', e => {
+                    e.preventDefault();
+                    const target = document.getElementById(a.getAttribute('href').slice(1));
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    tocLinks.forEach(l => l.classList.remove('active'));
+                    a.classList.add('active');
+                });
+            });
+
+        } catch(e) {
+            console.error(e);
+            showError('خطا در بارگذاری دایجست');
+        }
+    }
+
+    loadDigest();
+    </script>
+</body>
+</html>

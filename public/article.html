@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مقاله | neurosurgery.digest</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="logo">
+                <span class="logo-icon">🧠</span>
+                <div>
+                    <a href="index.html" class="site-name" style="text-decoration:none;">neurosurgery.digest</a>
+                    <div class="site-subtitle">مروری بر مهم‌ترین مقالات نوروسرجری</div>
+                </div>
+            </div>
+            <div class="header-decoration">🦴</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="article-page">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>در حال بارگذاری مقاله...</p>
+            </div>
+            <div id="content"></div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <p class="copyright">© ۱۴۰۵ neurosurgery.digest</p>
+            <p class="credit">دکتر علیرضا | آینده جراح مغز و اعصاب</p>
+        </div>
+    </footer>
+
+    <script>
+    function getParams() {
+        const p = new URLSearchParams(window.location.search);
+        return { digest: p.get('digest'), article: p.get('article') };
+    }
+
+    function showError(msg) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').innerHTML = `
+            <div class="error-box">
+                <p>${msg}</p>
+                <a href="index.html" class="back-link">← بازگشت به صفحه اصلی</a>
+            </div>
+        `;
+    }
+
+    async function loadArticle() {
+        const { digest: slug, article: articleId } = getParams();
+        if (!slug || !articleId) { showError('آدرس مقاله نامعتبر است'); return; }
+
+        try {
+            const [postsR, contentR] = await Promise.all([
+                fetch('posts.json'),
+                fetch(`posts/${slug}.html`)
+            ]);
+
+            if (!contentR.ok) { showError('مقاله یافت نشد'); return; }
+
+            const posts = await postsR.json();
+            const meta = posts.find(p => p.slug === slug);
+            const html = await contentR.text();
+
+            // Parse out the specific article section
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+
+            // Find the article with matching id
+            const articleSection = document.getElementById(articleId);
+            if (!articleSection) { showError('بخش مورد نظر در این دایجست یافت نشد'); return; }
+
+            const articleHTML = articleSection.outerHTML;
+            // Also get all siblings until the next h2 or tip-box
+            let siblingsHTML = '';
+            let el = articleSection.nextElementSibling;
+            while (el && el.tagName !== 'H2') {
+                // If we hit a tip-box, stop before it (it belongs to the whole digest)
+                if (el.classList.contains('tip-box')) { break; }
+                siblingsHTML += el.outerHTML;
+                el = el.nextElementSibling;
+            }
+
+            document.getElementById('loading').style.display = 'none';
+
+            const title = articleSection.textContent.split('\n')[0].trim() || 'مقاله';
+
+            document.title = `${title} | neurosurgery.digest`;
+
+            // Find prev/next articles for navigation
+            const allH2s = tmp.querySelectorAll('h2');
+            let currentIdx = -1;
+            allH2s.forEach((h, i) => { if (h.id === articleId) currentIdx = i; });
+
+            let prevLink = '', nextLink = '';
+            if (currentIdx > 0) {
+                const prev = allH2s[currentIdx - 1];
+                prevLink = `<a href="article.html?digest=${slug}&article=${prev.id}">→ ${prev.textContent.slice(0, 50)}</a>`;
+            }
+            if (currentIdx < allH2s.length - 1) {
+                const next = allH2s[currentIdx + 1];
+                nextLink = `<a href="article.html?digest=${slug}&article=${next.id}">${next.textContent.slice(0, 50)} ←</a>`;
+            }
+
+            document.getElementById('content').innerHTML = `
+                <a href="digest.html?slug=${slug}" class="back-link">← بازگشت به دایجست کامل</a>
+
+                <div class="article-body">
+                    ${articleHTML}
+                    ${siblingsHTML}
+                </div>
+
+                <nav class="article-nav">
+                    ${prevLink || '<span></span>'}
+                    ${nextLink || '<span></span>'}
+                </nav>
+            `;
+
+        } catch(e) {
+            console.error(e);
+            showError('خطا در بارگذاری مقاله');
+        }
+    }
+
+    loadArticle();
+    </script>
+</body>
+</html>
