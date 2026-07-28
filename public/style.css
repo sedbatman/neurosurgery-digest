@@ -449,6 +449,122 @@ body {
     font-weight: 500;
 }
 
+/* Digest Article Styles */
+.digest-intro {
+    background: var(--bg-tertiary);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+    border-right: 4px solid var(--accent-primary);
+    font-size: 1.1rem;
+    line-height: 2;
+    color: var(--text-secondary);
+}
+
+.article-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.article-meta a {
+    color: var(--accent-tertiary);
+    text-decoration: none;
+}
+
+.article-meta a:hover {
+    text-decoration: underline;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    color: white;
+}
+
+.tip-box {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+    border: 1px solid var(--accent-primary);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.tip-box strong {
+    color: var(--accent-tertiary);
+    font-size: 1.1rem;
+}
+
+.tip-box ul {
+    margin: 1rem 0;
+    padding-right: 1.5rem;
+}
+
+.tip-box li {
+    margin-bottom: 0.5rem;
+    line-height: 1.8;
+}
+
+/* Article headings inside content */
+.article-content h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-tertiary);
+    margin: 2.5rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-primary);
+}
+
+.article-content h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent-tertiary);
+    margin: 1.5rem 0 0.75rem 0;
+}
+
+.article-content ul {
+    margin: 0.75rem 0 1.25rem 0;
+    padding-right: 1.5rem;
+}
+
+.article-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.9;
+}
+
+.article-content p {
+    margin-bottom: 1.25rem;
+    text-align: justify;
+    line-height: 2;
+}
+
+/* Responsive for post content */
+@media (max-width: 768px) {
+    .digest-intro {
+        padding: 1.25rem;
+        font-size: 1rem;
+    }
+    .article-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .tip-box {
+        padding: 1.25rem;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
     .posts-grid {
