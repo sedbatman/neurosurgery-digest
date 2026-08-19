@@ -41,9 +41,24 @@
 
     <script>
     const months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-    function fmtDate(d) {
+    // Accurate Gregorian→Jalali conversion (mirrors scripts/add_post.py)
+    // 'YYYY-MM-DD' parses as UTC midnight in JS, so Date.UTC math is exact.
+    function jalaliFromGreg(d) {
         const dt = new Date(d);
-        return `${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()+621}`;
+        const y = dt.getUTCFullYear(), m = dt.getUTCMonth()+1, day = dt.getUTCDate();
+        const delta = Math.round((Date.UTC(y, m-1, day) - Date.UTC(2026, 2, 21)) / 86400000); // 1 Far 1405
+        const leap = yr => [1,5,9,13,17,22,26,30].includes(((yr%33)+33)%33);
+        const ylen = yr => leap(yr) ? 366 : 365;
+        let jy = 1405, rem = delta;
+        if (rem < 0) { while (rem < 0) { jy--; rem += ylen(jy); } }
+        else { while (rem >= ylen(jy)) { rem -= ylen(jy); jy++; } }
+        let jm, jd;
+        if (rem < 186) { jm = Math.floor(rem/31)+1; jd = rem%31+1; }
+        else { const r2 = rem-186; jm = Math.floor(r2/30)+7; jd = r2%30+1; }
+        return `${jd} ${months[jm-1]} ${jy}`;
+    }
+    function fmtDate(d, dateFa) {
+        return dateFa || jalaliFromGreg(d);
     }
 
     function getSlug() {
@@ -96,7 +111,7 @@
             const metaHTML = meta ? `
                 <div class="article-meta">
                     <span class="badge">${meta.study_type}</span>
-                    <span>📅 ${fmtDate(meta.date)}</span>
+                    <span>📅 ${fmtDate(meta.date, meta.date_fa)}</span>
                     <span>📚 ${meta.journal}</span>
                     <span>⏱ ${meta.reading_time || 5} دقیقه مطالعه</span>
                 </div>

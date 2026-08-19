@@ -6,7 +6,8 @@
     "date": "2026-07-28",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 10
+    "reading_time": 10,
+    "date_fa": "6 مرداد 1405"
   },
   {
     "slug": "2026-07-30",
@@ -15,7 +16,8 @@
     "date": "2026-07-30",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 13
+    "reading_time": 13,
+    "date_fa": "8 مرداد 1405"
   },
   {
     "slug": "2026-08-04",
@@ -24,7 +26,8 @@
     "date": "2026-08-04",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 15
+    "reading_time": 15,
+    "date_fa": "13 مرداد 1405"
   },
   {
     "slug": "2026-08-05",
@@ -33,7 +36,8 @@
     "date": "2026-08-05",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 17
+    "reading_time": 17,
+    "date_fa": "14 مرداد 1405"
   },
   {
     "slug": "2026-08-06",
@@ -42,7 +46,8 @@
     "date": "2026-08-06",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 9
+    "reading_time": 9,
+    "date_fa": "15 مرداد 1405"
   },
   {
     "slug": "2026-08-07",
@@ -51,7 +56,8 @@
     "date": "2026-08-07",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 8
+    "reading_time": 8,
+    "date_fa": "16 مرداد 1405"
   },
   {
     "slug": "2026-08-08",
@@ -60,7 +66,8 @@
     "date": "2026-08-08",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 11
+    "reading_time": 11,
+    "date_fa": "17 مرداد 1405"
   },
   {
     "slug": "2026-08-09",
@@ -69,7 +76,8 @@
     "date": "2026-08-09",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 13
+    "reading_time": 13,
+    "date_fa": "18 مرداد 1405"
   },
   {
     "slug": "2026-08-10",
@@ -78,7 +86,8 @@
     "date": "2026-08-10",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 14
+    "reading_time": 14,
+    "date_fa": "19 مرداد 1405"
   },
   {
     "slug": "2026-08-11",
@@ -87,7 +96,8 @@
     "date": "2026-08-11",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 15
+    "reading_time": 15,
+    "date_fa": "20 مرداد 1405"
   },
   {
     "slug": "2026-08-12",
@@ -96,7 +106,8 @@
     "date": "2026-08-12",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 15
+    "reading_time": 15,
+    "date_fa": "21 مرداد 1405"
   },
   {
     "slug": "2026-08-13",
@@ -105,7 +116,8 @@
     "date": "2026-08-13",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 9
+    "reading_time": 9,
+    "date_fa": "22 مرداد 1405"
   },
   {
     "slug": "2026-08-14",
@@ -114,7 +126,8 @@
     "date": "2026-08-14",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 11
+    "reading_time": 11,
+    "date_fa": "23 مرداد 1405"
   },
   {
     "slug": "2026-08-15",
@@ -123,7 +136,8 @@
     "date": "2026-08-15",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 8
+    "reading_time": 8,
+    "date_fa": "24 مرداد 1405"
   },
   {
     "slug": "2026-08-16",
@@ -132,7 +146,8 @@
     "date": "2026-08-16",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 15
+    "reading_time": 15,
+    "date_fa": "25 مرداد 1405"
   },
   {
     "slug": "2026-08-18",
@@ -141,13 +156,15 @@
     "date": "2026-08-18",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
-    "reading_time": 14
+    "reading_time": 14,
+    "date_fa": "27 مرداد 1405"
   },
   {
     "slug": "2026-08-19",
     "title": "2026-08-19 Neurosurgery Digest",
     "summary": "Review of 10 important neurosurgery articles",
     "date": "2026-08-19",
+    "date_fa": "28 مرداد 1405",
     "journal": "Multiple",
     "study_type": "مطالعه مروری",
     "reading_time": 14

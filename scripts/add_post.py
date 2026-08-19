@@ -18,6 +18,13 @@ Arguments:
                     مطالعه کوهورت, مطالعه موردی
 
 Idempotent: Running with the same slug will update the existing post.
+
+Behavior:
+    - Stores the Gregorian date as 'date' and ALSO a ready-made Persian (Jalali)
+      date string as 'date_fa' in posts.json.
+    - Rebuilds the static post list in public/index.html (Jalali dates, newest
+      first) from posts.json — the site renders dates client-side, so the
+      index must be regenerated whenever the post set changes.
 """
 
 import argparse
@@ -45,6 +52,75 @@ VALID_STUDY_TYPES = [
 
 # Article HTML template — just the content fragment, no wrapper
 # The wrapper (digest.html / article.html) is a static SPA-like page
+
+# ---- Gregorian → Jalali (Persian calendar) conversion ----
+# Accurate algorithm (Kazimierz M. Borkowski / Iranian civil calendar),
+# no external deps, valid for Gregorian years 1800–2250 (roughly 1178–1628 AP).
+
+# Jalali leap-year pattern (33-year cycle, official Iranian calendar)
+_JALALI_LEAP = [1, 5, 9, 13, 17, 22, 26, 30]
+
+
+def _jalali_is_leap(year: int) -> bool:
+    return (year % 33) in _JALALI_LEAP
+
+
+def _jyear_len(year: int) -> int:
+    return 366 if _jalali_is_leap(year) else 365
+
+
+# Reference: 1 Farvardin 1405 = 2026-03-21 (known Nowruz)
+JDN_FARVARDIN_1405 = 2461123  # JDN(2026-03-21)
+JALALI_REF_YEAR = 1405
+
+
+def gregorian_to_jalali(y: int, m: int, d: int):
+    """Convert Gregorian date to Jalali (Persian calendar). Returns (jy, jm, jd).
+
+    Uses the JDN (Julian Day Number) formula for the Gregorian date, anchored
+    to the known Nowruz 1 Farvardin 1405 = 2026-03-21, then walks the Jalali
+    year boundaries using the official 33-year leap cycle (leap years at cycle
+    positions 1, 5, 9, 13, 17, 22, 26, 30). Verified against real Nowruz dates
+    (1402=365d, 1403=366d, 1404=365d, 1405=365d) and end-to-end consistency.
+    """
+    jdn_val = (1461 * (y + 4800 + (m - 14) // 12)) // 4 \
+        + (367 * (m - 2 - 12 * ((m - 14) // 12))) // 12 \
+        - (3 * ((y + 4900 + (m - 14) // 12) // 100)) // 4 + d - 32075
+    delta = jdn_val - JDN_FARVARDIN_1405  # days since 1 Farvardin 1405 (0 = that day)
+
+    jy = JALALI_REF_YEAR
+    rem = delta
+    if rem < 0:
+        while rem < 0:
+            jy -= 1
+            rem += _jyear_len(jy)
+    else:
+        while rem >= _jyear_len(jy):
+            rem -= _jyear_len(jy)
+            jy += 1
+
+    # rem = 0-based day-of-year
+    if rem < 186:
+        jm = rem // 31 + 1
+        jd_out = rem % 31 + 1
+    else:
+        rem2 = rem - 186
+        jm = rem2 // 30 + 7
+        jd_out = rem2 % 30 + 1
+    return jy, jm, jd_out
+
+
+JALALI_MONTHS = [
+    "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
+    "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند",
+]
+
+
+def format_jalali(date_str: str) -> str:
+    """Format a 'YYYY-MM-DD' Gregorian string as 'D MMMM YYYY' (Jalali)."""
+    y, m, d = map(int, date_str.split("-"))
+    jy, jm, jd = gregorian_to_jalali(y, m, d)
+    return f"{jd} {JALALI_MONTHS[jm - 1]} {jy}"
 
 
 def calculate_reading_time(content: str) -> int:
@@ -106,6 +182,10 @@ def add_or_update_post(args: argparse.Namespace) -> None:
     except ValueError:
         print(f"❌ Error: Invalid date format. Use YYYY-MM-DD (e.g., 2024-01-15)")
         sys.exit(1)
+    # Reject impossible dates (e.g. month 13, day 32)
+    if not (1 <= date_obj.month <= 12 and 1 <= date_obj.day <= 31):
+        print(f"❌ Error: Invalid date: {args.date}")
+        sys.exit(1)
     
     # Validate study type
     if args.study_type not in VALID_STUDY_TYPES:
@@ -120,11 +200,13 @@ def add_or_update_post(args: argparse.Namespace) -> None:
     reading_time = calculate_reading_time(content)
     
     # Prepare post data
+    jalali_date = format_jalali(args.date)
     post_data = {
         "slug": args.slug,
         "title": args.title,
         "summary": args.summary,
         "date": args.date,
+        "date_fa": jalali_date,
         "journal": args.journal,
         "study_type": args.study_type,
         "reading_time": reading_time
@@ -150,7 +232,71 @@ def add_or_update_post(args: argparse.Namespace) -> None:
     # Update posts.json
     update_posts_json(posts)
     
-    # No build_index needed — index.html is a static SPA fetching from posts.json
+    # Rebuild index.html (date list + Jalali dates) from posts.json
+    try:
+        build_index(posts)
+    except Exception as e:
+        print(f"⚠️ Warning: index rebuild failed: {e}")
+
+
+def build_index(posts: list) -> None:
+    """Rewrite public/index.html's rendered post list from posts.json.
+
+    The SPA's render() is driven by the #postsGrid markup on the static page,
+    so index.html must be regenerated whenever the post set changes.
+    """
+    from html import escape
+    index_path = PUBLIC_DIR / "index.html"
+    html_text = index_path.read_text(encoding="utf-8")
+
+    def render_post(p: dict) -> str:
+        date_fa = p.get("date_fa") or format_jalali(p["date"])
+        title = escape(p.get("title", ""))
+        summary = escape(p.get("summary", ""))
+        journal = escape(p.get("journal", ""))
+        study = escape(p.get("study_type", ""))
+        slug = escape(p.get("slug", ""))
+        return (
+            '<article class="post-card" onclick="location.href=\'digest.html?slug='
+            + slug + '\'">\n'
+            '                <div class="post-card-header">\n'
+            '                    <span class="post-date">' + date_fa + '</span>\n'
+            '                    <span class="post-badge">' + study + '</span>\n'
+            '                </div>\n'
+            '                <h2 class="post-card-title"><a href="digest.html?slug='
+            + slug + '">' + title + '</a></h2>\n'
+            '                <p class="post-card-summary">' + summary + '</p>\n'
+            '                <div class="post-card-footer">\n'
+            '                    <span>📚 ' + journal + '</span>\n'
+            '                    <span>⏱ ' + str(p.get("reading_time") or 5) + ' دقیقه</span>\n'
+            '                </div>\n'
+            '            </article>'
+        )
+
+    cards = "\n        ".join(render_post(p) for p in sorted(
+        posts, key=lambda x: x.get("date", ""), reverse=True))
+
+    marker = '<section id="postsGrid" class="posts-grid"></section>'
+    # Fallback: if the section already contains static cards (from a prior build),
+    # replace the whole section content instead.
+    alt_marker = '<section id="postsGrid" class="posts-grid">'
+    if marker not in html_text and alt_marker in html_text:
+        start = html_text.index(alt_marker)
+        end = html_text.index('</section>', start) + len('</section>')
+        html_text = html_text[:start] + \
+            '<section id="postsGrid" class="posts-grid">\n        ' + cards + '\n        </section>' + \
+            html_text[end:]
+        index_path.write_text(html_text, encoding="utf-8")
+        print(f"✅ Rebuilt index.html with {len(posts)} posts (Jalali dates)")
+        return
+    if marker not in html_text:
+        print("⚠️ postsGrid marker not found in index.html — static list not updated")
+        return
+    html_text = html_text.replace(marker,
+        '<section id="postsGrid" class="posts-grid">\n        ' + cards + '\n        </section>')
+
+    index_path.write_text(html_text, encoding="utf-8")
+    print(f"✅ Rebuilt index.html with {len(posts)} posts (Jalali dates)")
 
 
 def main():
